@@ -79,8 +79,8 @@ if (rules === null) {
   fail('AGENTS.md: missing "Agent Strict Rules" section');
 } else {
   const nums = [...rules.matchAll(/^(\d+)\.\s/gm)].map((m) => Number(m[1]));
-  const want = Array.from({ length: 15 }, (_, i) => i + 1);
-  if (nums.join(',') !== want.join(',')) fail('AGENTS.md: rules must be numbered exactly 1..15, found: ' + nums.join(','));
+  const want = Array.from({ length: 16 }, (_, i) => i + 1);
+  if (nums.join(',') !== want.join(',')) fail('AGENTS.md: rules must be numbered exactly 1..16, found: ' + nums.join(','));
 }
 
 const phases = section(agents, 'Phase Map');
