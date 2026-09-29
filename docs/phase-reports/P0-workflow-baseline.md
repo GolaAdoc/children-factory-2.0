@@ -18,6 +18,4 @@ Phase 0 established the foundational documentation, repository workflow rules, c
 - **Branch Protection**: Configured GitHub branch protection to require linear history, disallow force pushes/deletions, and mandate successful CI checks before merging.
 
 ## Visual Evidence
-Screenshots of the UI, API responses (Postman/Insomnia), or terminal outputs.
-
-![Screenshot Description](./assets/p0-screenshot-1.png)
+![Phase0 Success](./assets/p0-success.png)
