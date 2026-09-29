@@ -1,0 +1,33 @@
+name: docs-ci
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docs-verify:
+    name: docs-verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Structural checks
+        run: node scripts/verify-docs.mjs
+      - name: Render Mermaid diagrams
+        run: |
+          echo '{"args":["--no-sandbox"]}' > "$RUNNER_TEMP/puppeteer.json"
+          for f in docs/diagrams/*.md; do
+            npx --yes @mermaid-js/mermaid-cli@11 -p "$RUNNER_TEMP/puppeteer.json" -i "$f" -o "$RUNNER_TEMP/$(basename "$f")"
+          done
