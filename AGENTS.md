@@ -63,6 +63,8 @@ Stage 0 excludes Redis and Nginx.
 
 15. If requirements conflict, stop. Identify the conflict.
 
+16. Phase Reporting: Every phase must generate a markdown report in docs/phase-reports/P[X]-[name].md detailing the executive summary, modules modified, technical implementation, and a placeholder for visual evidence.
+
 ## Migration protocol
 - prisma migrate dev --create-only --name <name>.
 - Append any custom SQL to the generated migration.sql.
