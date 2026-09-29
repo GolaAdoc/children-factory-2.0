@@ -1,0 +1,16 @@
+{
+  "name": "@webstore/api",
+  "version": "0.0.0",
+  "private": true,
+  "description": "NestJS API (scaffolded in P1B). P1A holds only Prisma migration tooling.",
+  "engines": {
+    "node": ">=20.6"
+  },
+  "scripts": {
+    "prisma": "dotenv -e ../../.env -- prisma"
+  },
+  "devDependencies": {
+    "dotenv-cli": "^11.0.0",
+    "prisma": "^6.19.3"
+  }
+}

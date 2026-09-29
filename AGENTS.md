@@ -31,6 +31,7 @@ this file is the binding contract for all agents. Where it conflicts with a prom
 | Stage 7 | P23, P24, P25 | Edge and production (P23 to P25). |
 
 Stage 0 excludes Redis and Nginx.
+P1 is delivered as sub-phases P1A (database foundation), P1B (API hardening) and P1C (web and full-stack Compose); see docs/README.md flag F-7.
 
 ## Agent Strict Rules
 1. Never invent schema fields, endpoints, providers, or environment variables not specified in the master context without flagging it first.
