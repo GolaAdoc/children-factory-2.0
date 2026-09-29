@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// P0 docs verification. Node built-ins only.
-import { existsSync, readFileSync } from 'node:fs';
+// Docs and contract verification (P0; amended in P1A). Node built-ins only.
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -21,14 +21,14 @@ const REQUIRED_FILES = [
   'docs/runbooks/branch-protection.md',
   '.github/workflows/docs-ci.yml',
   'scripts/verify-docs.mjs',
+  '.github/workflows/app-ci.yml',
+  'docs/phase-reports/P1A-database-foundation.md',
 ];
 
-// P0-ONLY tripwire (Rule 11). P1 MUST remove or relax this list.
-const FORBIDDEN_ROOT_PATHS = [
-  'package.json', 'package-lock.json', 'pnpm-lock.yaml', 'yarn.lock',
-  'tsconfig.json', 'Dockerfile', 'docker-compose.yml', 'docker-compose.yaml',
-  '.env', 'apps', 'src', 'prisma', 'nginx',
-];
+// STAGE-0 GUARD (Rules 4 and 11): Stage 0 has no Redis or Nginx.
+// Retire the redis entries in P3 and the nginx entries in P23.
+const FORBIDDEN_ROOT_PATHS = ['nginx', 'redis'];
+const FORBIDDEN_COMPOSE_PATTERNS = [/^\s*(redis|nginx)\s*:/im, /image:\s*\S*(redis|nginx)/i];
 
 function finish() {
   if (failures.length) {
@@ -49,12 +49,18 @@ function section(text, headingStart) {
   return lines.slice(start + 1, end).join('\n');
 }
 
-// 1. Required files and forbidden paths
+// 1. Required files and Stage-0 guard
 for (const f of REQUIRED_FILES) {
   if (!existsSync(join(ROOT, f))) fail('missing required file: ' + f);
 }
 for (const f of FORBIDDEN_ROOT_PATHS) {
-  if (existsSync(join(ROOT, f))) fail('forbidden path present (Rule 11, P0 scope): ' + f);
+  if (existsSync(join(ROOT, f))) fail('forbidden Stage 0 path present (Rule 11): ' + f);
+}
+if (existsSync(join(ROOT, 'docker-compose.yml'))) {
+  const compose = read('docker-compose.yml');
+  for (const re of FORBIDDEN_COMPOSE_PATTERNS) {
+    if (re.test(compose)) fail('docker-compose.yml: redis or nginx service/image is forbidden in Stage 0 (Rule 11)');
+  }
 }
 if (failures.length) finish();
 
@@ -113,12 +119,18 @@ for (const d of DIAGRAMS) {
 }
 
 // 4. Workflow assertions
-const wf = read('.github/workflows/docs-ci.yml');
-if (!/^\s+name:\s*docs-verify\s*$/m.test(wf)) fail('workflow: job name must be docs-verify');
-if (!/^permissions:\s*\n\s+contents:\s*read\s*$/m.test(wf)) fail('workflow: top-level permissions must be contents: read');
-if (!/^\s*pull_request:/m.test(wf)) fail('workflow: must trigger on pull_request');
-if (!/^\s*push:/m.test(wf)) fail('workflow: must trigger on push');
-if (/^\s*paths(-ignore)?:/m.test(wf)) fail('workflow: path filters are forbidden (required check would hang)');
+const WORKFLOWS = [
+  { file: '.github/workflows/docs-ci.yml', job: 'docs-verify' },
+  { file: '.github/workflows/app-ci.yml', job: 'app-verify' },
+];
+for (const w of WORKFLOWS) {
+  const wf = read(w.file);
+  if (!new RegExp('^\\s+name:\\s*' + w.job + '\\s*$', 'm').test(wf)) fail(w.file + ': job name must be ' + w.job);
+  if (!/^permissions:\s*\n\s+contents:\s*read\s*$/m.test(wf)) fail(w.file + ': top-level permissions must be contents: read');
+  if (!/^\s*pull_request:/m.test(wf)) fail(w.file + ': must trigger on pull_request');
+  if (!/^\s*push:/m.test(wf)) fail(w.file + ': must trigger on push');
+  if (/^\s*paths(-ignore)?:/m.test(wf)) fail(w.file + ': path filters are forbidden (required check would hang)');
+}
 
 // 5. Relative markdown links
 for (const f of REQUIRED_FILES.filter((x) => x.endsWith('.md'))) {
@@ -126,6 +138,15 @@ for (const f of REQUIRED_FILES.filter((x) => x.endsWith('.md'))) {
   for (const m of text.matchAll(/\]\((?!https?:|mailto:|#)([^)\s#]+)(?:#[^)]*)?\)/g)) {
     const target = resolve(dirname(join(ROOT, f)), m[1]);
     if (!existsSync(target)) fail(f + ': broken relative link -> ' + m[1]);
+  }
+}
+
+// 6. Phase reports (Rule 16)
+const REPORT_HEADINGS = ['Executive summary', 'Modules modified', 'Technical implementation', 'Visual evidence'];
+for (const f of readdirSync(join(ROOT, 'docs/phase-reports')).filter((x) => /^P\d+[A-Z]?-.+\.md$/.test(x))) {
+  const text = read('docs/phase-reports/' + f);
+  for (const h of REPORT_HEADINGS) {
+    if (!new RegExp('^## ' + h, 'm').test(text)) fail('docs/phase-reports/' + f + ': missing heading "## ' + h + '"');
   }
 }
 

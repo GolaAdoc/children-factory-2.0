@@ -1,0 +1,48 @@
+name: app-ci
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: app-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  app-verify:
+    name: app-verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/api/package-lock.json
+      - name: Create .env from template
+        run: cp .env.example .env
+      - name: Start Postgres
+        run: docker compose up -d --wait db
+      - name: Install API dependencies
+        working-directory: apps/api
+        run: npm ci
+      - name: Validate Prisma schema
+        working-directory: apps/api
+        run: npm run prisma -- validate
+      - name: Apply migrations
+        working-directory: apps/api
+        run: npm run prisma -- migrate deploy
+      - name: Verify database
+        run: node --env-file=.env scripts/verify-db.mjs
+      - name: Show database logs on failure
+        if: failure()
+        run: docker compose logs db
+      - name: Stop Postgres
+        if: always()
+        run: docker compose down -v

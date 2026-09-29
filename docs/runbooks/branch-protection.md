@@ -24,7 +24,7 @@
 $repo = gh repo view --json nameWithOwner -q .nameWithOwner
 $body = @'
 {
-  "required_status_checks": { "strict": true, "contexts": ["docs-verify"] },
+  "required_status_checks": { "strict": true, "contexts": ["docs-verify", "app-verify"] },
   "enforce_admins": true,
   "required_pull_request_reviews": { "required_approving_review_count": 0, "dismiss_stale_reviews": true },
   "restrictions": null,
@@ -46,3 +46,6 @@ gh api "repos/$repo/branches/main/protection" --jq '{strict: .required_status_ch
 ## Fallbacks
 - If the API returns 403 ("Upgrade to GitHub Pro or make this repository public"), STOP and report. The owner chooses between making the repo public, upgrading the plan, or an equivalent repository ruleset.
 - Never mark protection done without the verification output.
+
+> P1A amendment: `app-verify` (workflow `app-ci.yml`) is a second required check. Add it only after it has run once on `main`, using:
+> `'{\"strict\":true,\"contexts\":[\"docs-verify\",\"app-verify\"]}' | gh api --method PATCH "repos/$repo/branches/main/protection/required_status_checks" --input -`
