@@ -2,6 +2,7 @@ export interface Env {
   NODE_ENV: 'development' | 'test' | 'production';
   PORT: number;
   DATABASE_URL: string;
+  REDIS_URL: string;
 }
 
 // Defense in depth: the runtime must never connect as the DDL role or the bootstrap superuser.
@@ -37,8 +38,18 @@ export function readEnv(raw: NodeJS.ProcessEnv = process.env): Env {
     errors.push('DATABASE_URL must use the least-privilege application role');
   }
 
+  const redisUrl = raw.REDIS_URL ?? '';
+  try {
+    const parsed = new URL(redisUrl);
+    if (parsed.protocol !== 'redis:') throw new Error('unsupported protocol');
+    if (!parsed.hostname) throw new Error('empty host');
+    if (!parsed.password) throw new Error('empty password');
+  } catch {
+    errors.push('REDIS_URL must be a valid redis:// URL with a non-empty host and password');
+  }
+
   if (errors.length > 0) {
     throw new Error('Invalid environment: ' + errors.join('; '));
   }
-  return { NODE_ENV: nodeEnv as Env['NODE_ENV'], PORT: port, DATABASE_URL: url };
+  return { NODE_ENV: nodeEnv as Env['NODE_ENV'], PORT: port, DATABASE_URL: url, REDIS_URL: redisUrl };
 }

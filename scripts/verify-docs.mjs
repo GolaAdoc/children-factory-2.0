@@ -26,9 +26,9 @@ const REQUIRED_FILES = [
 ];
 
 // STAGE-0 GUARD (Rules 4 and 11): Stage 0 has no Redis or Nginx.
-// Retire the redis entries in P3 and the nginx entries in P23.
-const FORBIDDEN_ROOT_PATHS = ['nginx', 'redis'];
-const FORBIDDEN_COMPOSE_PATTERNS = [/^\s*(redis|nginx)\s*:/im, /image:\s*\S*(redis|nginx)/i];
+// Redis guard RETIRED in P3 (authorized, F-37). Nginx guard remains until P23.
+const FORBIDDEN_ROOT_PATHS = ['nginx'];
+const FORBIDDEN_COMPOSE_PATTERNS = [/^\s*nginx\s*:/im, /image:\s*\S*nginx/i];
 
 function finish() {
   if (failures.length) {
@@ -59,7 +59,7 @@ for (const f of FORBIDDEN_ROOT_PATHS) {
 if (existsSync(join(ROOT, 'docker-compose.yml'))) {
   const compose = read('docker-compose.yml');
   for (const re of FORBIDDEN_COMPOSE_PATTERNS) {
-    if (re.test(compose)) fail('docker-compose.yml: redis or nginx service/image is forbidden in Stage 0 (Rule 11)');
+    if (re.test(compose)) fail('docker-compose.yml: nginx service/image is forbidden until P23 (Rule 11)');
   }
 }
 if (failures.length) finish();

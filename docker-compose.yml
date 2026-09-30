@@ -41,6 +41,7 @@ services:
       PORT: "3001"
       # Least-privilege application role only. No migrator or superuser credentials reach this container.
       DATABASE_URL: "postgresql://webstore_app:${APP_DB_PASSWORD:?set APP_DB_PASSWORD in .env}@db:5432/${POSTGRES_DB:?set POSTGRES_DB in .env}?schema=public"
+      REDIS_URL: "redis://:${REDIS_PASSWORD:?REDIS_PASSWORD is required}@redis:6379"
     ports:
       - "127.0.0.1:3001:3001"
     healthcheck:
@@ -79,5 +80,26 @@ services:
     security_opt:
       - no-new-privileges:true
 
+  redis:
+    image: redis:8-alpine
+    user: redis
+    init: true
+    restart: unless-stopped
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+    command: ["sh", "-c", "exec redis-server --requirepass \"$$REDIS_PASSWORD\" --appendonly yes --appendfsync everysec --maxmemory 256mb --maxmemory-policy volatile-lru"]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "REDISCLI_AUTH=\"$$REDIS_PASSWORD\" redis-cli ping | grep -q PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
 volumes:
   pgdata:
+  redis-data:

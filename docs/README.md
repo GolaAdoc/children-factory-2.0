@@ -47,6 +47,12 @@
 - F-28: No new dependencies. swagger-cli is used via one-off npx for validation and is not installed.
 - F-29: The images jsonb shape is string[] of absolute https URLs. P10 must conform. The API defensively filters non-strings.
 - F-31: The web image could not write the ISR cache (.next/cache ownership under USER node). Fixed ownership in the web Dockerfile (a P1C defect fix).
+- F-32: P3 scope: Redis cache for the product-list endpoint only. Categories and product-detail remain uncached (categories are cheap; detail TTL requires a P9 invalidation strategy).
+- F-33: Two new required env vars: `REDIS_PASSWORD` (URL-safe hex secret, generate with `openssl rand -hex 32`) and `REDIS_URL` (`redis://:$pw@redis:6379` in Compose; `redis://:$pw@127.0.0.1:6379` for host-side dev/e2e). Neither must appear in logs.
+- F-34: Image `redis:8-alpine` is BSD-licensed. The redis module itself is BSD-2-Clause; ioredis is MIT. No licensing conflict.
+- F-35: AOF with `everysec` fsync and `volatile-lru` eviction at 256 MB. AOF provides single-node durability for a warm cache (not a source of truth — Rule 5 is unaffected). `volatile-lru` evicts only keys with a TTL set, protecting non-catalog keys that may be added in future phases.
+- F-36: P3 touches approximately 15 paths, over the ~10 sizing target. The user explicitly authorized no split.
+- F-37: Two Stage-0 guardrails retired on user authorization: (a) `FORBIDDEN_COMPOSE_PATTERNS` Redis entries removed from `verify-docs.mjs`; (b) expected services list updated from `api,db,web` to `api,db,redis,web` in `verify-stack.mjs`. Nginx guard remains active until P23.
 
 ## What docs-verify asserts
 - The 12 required files exist (list in `scripts/verify-docs.mjs`).
@@ -63,3 +69,5 @@
 - [P1A: Database foundation](phase-reports/P1A-database-foundation.md)
 - [P1B: API hardening](phase-reports/P1B-api-hardening.md)
 - [P1C: Web and full-stack Compose](phase-reports/P1C-web-and-full-stack-compose.md)
+- [P2: Catalog read](phase-reports/P2-catalog-read.md)
+- [P3: Catalog cache](phase-reports/P3-catalog-cache.md)

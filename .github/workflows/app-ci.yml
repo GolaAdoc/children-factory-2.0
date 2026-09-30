@@ -26,9 +26,13 @@ jobs:
           cache: npm
           cache-dependency-path: apps/api/package-lock.json
       - name: Create .env from template
-        run: cp .env.example .env
-      - name: Start Postgres
-        run: docker compose up -d --wait db
+        run: |
+          cp .env.example .env
+          REDIS_PW="$(openssl rand -hex 32)"
+          echo "REDIS_PASSWORD=${REDIS_PW}" >> .env
+          echo "REDIS_URL=redis://:${REDIS_PW}@127.0.0.1:6379" >> .env
+      - name: Start Postgres and Redis
+        run: docker compose up -d --wait db redis
       - name: Install API dependencies
         working-directory: apps/api
         run: npm ci
@@ -52,16 +56,17 @@ jobs:
       - name: E2E tests
         working-directory: apps/api
         run: npm run test:e2e
-      - name: Smoke test (runtime env holds only the app-role URL)
+      - name: Smoke test (runtime env holds only the app-role URL and Redis URL)
         working-directory: apps/api
         run: |
           set -eu
           APP_URL="$(grep '^DATABASE_URL=' ../../.env | cut -d= -f2-)"
+          REDIS_URL="redis://:ci-placeholder@127.0.0.1:6379"
           if env -i PATH="$PATH" NODE_ENV=production node dist/main.js > "$RUNNER_TEMP/noenv.log" 2>&1; then
             echo "API started without DATABASE_URL"; exit 1
           fi
           grep -q "Invalid environment" "$RUNNER_TEMP/noenv.log"
-          env -i PATH="$PATH" DATABASE_URL="$APP_URL" NODE_ENV=production PORT=3001 \
+          env -i PATH="$PATH" DATABASE_URL="$APP_URL" REDIS_URL="$REDIS_URL" NODE_ENV=production PORT=3001 \
             node dist/main.js > "$RUNNER_TEMP/api.log" 2>&1 &
           echo $! > "$RUNNER_TEMP/api.pid"
           ok=0
@@ -84,6 +89,8 @@ jobs:
         run: node scripts/verify-catalog.mjs
       - name: Verify stack
         run: node --env-file=.env scripts/verify-stack.mjs
+      - name: Verify cache
+        run: node scripts/verify-cache.mjs
       - name: Show database logs on failure
         if: failure()
         run: docker compose logs db
