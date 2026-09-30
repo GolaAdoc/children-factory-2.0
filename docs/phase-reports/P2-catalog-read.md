@@ -16,8 +16,7 @@ Delivered Phase 2 containing the Postgres read-only catalog models (Categories, 
 - **Cache Seam:** Abstracted standard `get`/`set` methods in `CatalogCache` which runs via an ephemeral in-memory placeholder (`NoopCatalogCache`) until Redis is mandated in Phase 3.
 
 ## Visual evidence
-![CI Success](./assets/p2-ci-success.png)
-![Verify Catalog](./assets/p2-verify-catalog.png)
+![Verify Catalog](./assets/p2-tests.png)
 ![Catalog UI](./assets/p2-catalog-ui.png)
 
 ## Flags and Deviations
