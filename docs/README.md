@@ -40,6 +40,13 @@
 - F-21: Web scope: a status scaffold with the working title "Webstore" (brand name not specified); no catalog, no extra routes; the web healthcheck uses `/`; `poweredByHeader` is off; web security headers and CSP are deferred to the edge stage.
 - F-22: Containers are non-root with `cap_drop: ALL`, `no-new-privileges` and `init: true`. `read_only` filesystems, digest-pinned images and resource limits are deferred to P25. Containers do not run migrations; a one-shot migrate job is deferred to P25.
 - F-23: Versions and amendments: Next.js 16, React 19, TypeScript 5, `node:22-alpine`. ADR-0003 is Accepted and treats the F-10 defaults as accepted. `docker-compose.yml`, `app-ci.yml` and `.gitignore` are amended additively (Rule 2).
+- F-24: The pasted scope omits the master P2 items OpenAPI and cache seam. Both were added. Seeding is not in the master row; kept as dev/CI-only, refuses NODE_ENV=production.
+- F-25: Sizing is about 21 paths, over the ~10 target, under your explicit no-split override. No split is proposed. Acceptance criteria stay at 6.
+- F-26: The GIN indexes products_attrs_gin and products_tags_gin from the target schema are deferred. No P2 query filters on attributes or tags. The columns exist, so re-adding the indexes later is a pure additive migration.
+- F-27: New public API decisions (the contract in the OpenAPI file): fixed page size 12, page 1–1000, category slug filter, inStock boolean, effective price, and category output {name, slug} only.
+- F-28: No new dependencies. swagger-cli is used via one-off npx for validation and is not installed.
+- F-29: The images jsonb shape is string[] of absolute https URLs. P10 must conform. The API defensively filters non-strings.
+- F-31: The web image could not write the ISR cache (.next/cache ownership under USER node). Fixed ownership in the web Dockerfile (a P1C defect fix).
 
 ## What docs-verify asserts
 - The 12 required files exist (list in `scripts/verify-docs.mjs`).

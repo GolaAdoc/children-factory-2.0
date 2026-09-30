@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 // Rendered per request so the Docker build never needs the API.
 export const dynamic = 'force-dynamic';
 
@@ -19,6 +21,7 @@ export default async function Home() {
     <main>
       <h1>Webstore</h1>
       <p data-api-status={api}>API status: {api}</p>
+      <Link href="/products">Products</Link>
     </main>
   );
 }

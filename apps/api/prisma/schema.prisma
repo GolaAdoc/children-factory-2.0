@@ -7,3 +7,48 @@ datasource db {
   url       = env("DATABASE_URL")
   directUrl = env("MIGRATE_DATABASE_URL")
 }
+
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String    @db.VarChar(50)
+  slug     String    @unique @db.VarChar(60)
+  products Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  categoryId  Int      @map("category_id")
+  name        String   @db.VarChar(150)
+  slug        String   @unique @db.VarChar(160)
+  description String?
+  basePrice   Int      @map("base_price")
+  images      Json     @default("[]")
+  attributes  Json     @default("{}")
+  tags        String[] @default([])
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  category Category         @relation(fields: [categoryId], references: [id])
+  variants ProductVariant[]
+
+  @@map("products")
+}
+
+model ProductVariant {
+  id            String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  productId     String  @map("product_id") @db.Uuid
+  size          String  @db.VarChar(20)
+  color         String  @db.VarChar(30)
+  sku           String  @unique @db.VarChar(40)
+  priceOverride Int?    @map("price_override")
+  stockQuantity Int     @default(0) @map("stock_quantity")
+  isActive      Boolean @default(true) @map("is_active")
+
+  product Product @relation(fields: [productId], references: [id])
+
+  @@unique([productId, size, color])
+  @@index([productId])
+  @@map("product_variants")
+}
