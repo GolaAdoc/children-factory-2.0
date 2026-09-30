@@ -28,6 +28,12 @@
 - F-10: Baseline contents are proposals awaiting owner confirmation: extension citext; app-role statement_timeout 15s and idle_in_transaction_session_timeout 30s.
 - F-11: P1A amends P0 (Rule 2): 16 rules; the Stage-0 guard replaces the P0 forbidden-path list; required files are now 12; P0 AC-1 and AC-2(b) are superseded; required checks are now docs-verify and app-verify.
 - F-12: P1B forward flags: use the helmet package (there is no @nestjs/helmet in the NestJS docs); health path /api/health; Prisma 6 needs prisma generate --allow-no-models while there are zero models.
+- F-13: P1B touches 15 paths (10 new, 5 amended), about 5 over the sizing target. The natural split point, if enforced, is Nest core hardening versus Prisma client, health and CI smoke.
+- F-14: Env config and logging (in the original P1 scope, absent from the P1B scope line) are included minimally with no new dependency: `readEnv` with fail-fast validation, the built-in Nest logger (JSON when `NODE_ENV=production`) and an access log without query strings.
+- F-15: New optional runtime variables `NODE_ENV` (default development) and `PORT` (default 3001). There is no HOST variable, so the server binds all interfaces, and P1C must publish the API port on loopback only or not at all. `readEnv` rejects a `DATABASE_URL` whose user is `webstore_migrator` or `postgres`.
+- F-16: P1B amends P1A `schema.prisma` (Rule 2) by adding the `prisma-client-js` generator block. The datasource and baseline migration are untouched.
+- F-17: Error contract: 5xx bodies are `{statusCode, error, message}` with generic status text. 4xx messages pass through, except 404, which is generic. There are no path or timestamp fields. P4 may extend the filter for domain errors.
+- F-18: Open risks checked in P1B: `prisma generate --allow-no-models` needs no DB variables; the Prisma client does not need `MIGRATE_DATABASE_URL` at runtime; Jest 30 with ts-jest 29 peer dependencies.
 
 ## What docs-verify asserts
 - The 12 required files exist (list in `scripts/verify-docs.mjs`).
@@ -42,3 +48,4 @@
 ## Phase reports
 
 - [P1A: Database foundation](phase-reports/P1A-database-foundation.md)
+- [P1B: API hardening](phase-reports/P1B-api-hardening.md)
