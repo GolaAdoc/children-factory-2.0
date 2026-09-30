@@ -19,7 +19,9 @@ Phase P1A established the database foundation. It introduced a Postgres containe
 - **CI Workflow**: Orchestrated cold-start test mirroring CI `app-ci.yml`, which ran cleanly. 
 
 ## Visual evidence
-_Placeholder: attach terminal captures (verify-db: OK, migrate status) and the green CI run here._
+![CI Success](./assets/p1a-ci-success.png)
+![Verify DB](./assets/p1a-verify-db.png)
+![Migrate Status](./assets/p1a-migrate.png)
 
 ## Flags and deviations
 - **Execution Policy Error**: Had to use `npm.cmd` explicitly instead of `npm` to bypass PowerShell script execution restrictions locally.

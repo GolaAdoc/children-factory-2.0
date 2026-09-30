@@ -19,7 +19,9 @@ Phase 1B successfully scaffolded the NestJS backend and applied critical global 
 - CI Workflow updated to execute `generate`, `build`, `test`, `test:e2e`, and an automated smoke test asserting `{"status":"ok","db":"up"}` at runtime without DDL credentials.
 
 ## Visual evidence
-_Placeholder: attach terminal captures (test output, curl output for health up and down) and the green CI run here._
+![CI Success](./assets/p1b-ci-success.png)
+![E2E Tests](./assets/p1b-tests.png)
+![Health Endpoint](./assets/p1b-health.png)
 
 ## Flags and deviations
 - Used `npm.cmd` directly due to execution policy overrides.
