@@ -91,8 +91,7 @@ check('citext installed', ext.out === 'citext', ext.out || ext.err);
 const acl = asMig(
   "SELECT count(*) FROM pg_default_acl d JOIN pg_roles r ON r.oid = d.defaclrole WHERE r.rolname = 'webstore_migrator'");
 check('default privileges exist for tables and sequences', acl.out === '2', acl.out || acl.err);
-const tables = asMig("SELECT count(*) FROM pg_tables WHERE schemaname = 'public' AND tablename <> '_prisma_migrations'");
-check('no business tables yet (P1A-only assertion; retire in P2)', tables.out === '0', tables.out || tables.err);
+// Removed P1A-only assertion: check('no business tables yet (P1A-only assertion; retire in P2)', tables.out === '0', tables.out || tables.err);
 
 // 9. Network exposure
 const port = spawnSync('docker', ['compose', 'port', 'db', '5432'], { encoding: 'utf8' });

@@ -13,7 +13,8 @@
     "start": "node dist/main.js",
     "start:local": "node --env-file=../../.env dist/main.js",
     "test": "jest --selectProjects unit",
-    "test:e2e": "dotenv -e ../../.env -- jest --selectProjects e2e"
+    "test:e2e": "dotenv -e ../../.env -- jest --selectProjects e2e",
+    "db:seed": "node prisma/seed.mjs"
   },
   "dependencies": {
     "@nestjs/common": "^11.2.7",

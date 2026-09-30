@@ -75,6 +75,13 @@ jobs:
           grep -q '"status":"ok"' "$RUNNER_TEMP/health.json"
       - name: Build images and start the full stack
         run: docker compose up -d --build --wait
+      - name: Seed database
+        working-directory: apps/api
+        run: |
+          APP_URL="$(grep '^DATABASE_URL=' ../../.env | cut -d= -f2-)"
+          DATABASE_URL="$APP_URL" npm run db:seed
+      - name: Verify catalog
+        run: node scripts/verify-catalog.mjs
       - name: Verify stack
         run: node --env-file=.env scripts/verify-stack.mjs
       - name: Show database logs on failure
