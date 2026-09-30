@@ -51,7 +51,7 @@ const GENERIC_503 = '{"statusCode":503,"error":"Service Unavailable","message":"
 
 // 1. Services and health
 const services = dc('config', '--services');
-check('services are exactly api, db, web', services.ok && lines(services.out).sort().join(',') === 'api,db,web', services.out || services.err);
+check('services are exactly api, db, redis, web', services.ok && lines(services.out).sort().join(',') === 'api,db,redis,web', services.out || services.err);
 const ps = dc('ps', '--format', '{{.Service}}={{.Health}}');
 const health = Object.fromEntries(lines(ps.out).map((l) => l.split('=')));
 for (const svc of ['db', 'api', 'web']) {
