@@ -49,7 +49,13 @@ async function fetchJSON(url) {
 // ─── AC1: categories endpoint ──────────────────────────────────────────────
 console.log('Running verify-cache.mjs...');
 
-const catRes = await fetchJSON(`${API}/api/categories`);
+let catRes;
+for (let attempt = 1; attempt <= 5; attempt++) {
+  catRes = await fetchJSON(`${API}/api/categories`);
+  if (catRes.status === 200) break;
+  await sleep(1000); // Allow Prisma connection pool to heal after verify-stack DB restart
+}
+
 check('AC1: /api/categories returns 200', catRes.status === 200, String(catRes.status));
 check(
   'AC1: exactly 4 seeded categories',
