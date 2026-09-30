@@ -15,7 +15,9 @@ Phase 1C bootstraps the Next.js frontend (`@webstore/web`) as a standalone SSR a
 - **Validation Script (`verify-stack.mjs`):** Confirmed all containers publish exclusively to `127.0.0.1`, `X-Powered-By` headers are removed, containers lack development tools like TS, and Next.js can smoothly degrade to `API status: unavailable` when the database halts without crashing the whole frontend. 
 
 ## Visual evidence
-_Placeholder: attach terminal captures (docker compose ps, verify-stack output, the rendered home page) and the green CI run here._
+![CI Success](./assets/p1c-ci-success.png)
+![Verify Stack](./assets/p1c-verify-stack.png)
+![Web UI](./assets/p1c-web-ui.png)
 
 ## Flags and deviations
 - F-19: P1C touches 16 paths (12 new including one lockfile, 4 amended), over the sizing target. The split point, if enforced, is web scaffold versus stack, CI and ADR.
