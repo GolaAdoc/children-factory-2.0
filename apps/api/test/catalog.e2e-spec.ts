@@ -56,7 +56,7 @@ describe('Catalog (e2e)', () => {
     if (prisma) {
       await prisma.productVariant.deleteMany({ where: { sku: { contains: runId } } });
       await prisma.product.deleteMany({ where: { slug: { contains: runId } } });
-      await prisma.category.deleteMany({ where: { slug: catSlug } });
+      await prisma.category.deleteMany({ where: { slug: { contains: runId } } });
     }
     if (app) await app.close();
   });
