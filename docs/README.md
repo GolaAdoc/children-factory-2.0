@@ -5,6 +5,7 @@
 | [AGENTS.md](../AGENTS.md) | Agent strict rules and context |
 | [ADR 0001: Modular monolith and stack](adr/0001-modular-monolith-and-stack.md) | Stack and monolith decisions |
 | [ADR 0002: Postgres source of truth](adr/0002-postgres-source-of-truth.md) | Database and cache decisions |
+| [ADR 0003: Database roles and the Prisma pin](adr/0003-database-roles-and-prisma-pin.md) | Database roles and the Prisma pin |
 | [ERD (Conceptual)](diagrams/erd.md) | Entity relationship diagram |
 | [Order state machine](diagrams/order-state-machine.md) | State machine for orders |
 | [Auth flow](diagrams/auth-flow.md) | Authentication sequence |
@@ -34,6 +35,11 @@
 - F-16: P1B amends P1A `schema.prisma` (Rule 2) by adding the `prisma-client-js` generator block. The datasource and baseline migration are untouched.
 - F-17: Error contract: 5xx bodies are `{statusCode, error, message}` with generic status text. 4xx messages pass through, except 404, which is generic. There are no path or timestamp fields. P4 may extend the filter for domain errors.
 - F-18: Open risks checked in P1B: `prisma generate --allow-no-models` needs no DB variables; the Prisma client does not need `MIGRATE_DATABASE_URL` at runtime; Jest 30 with ts-jest 29 peer dependencies.
+- F-19: P1C touches 16 paths (12 new including one lockfile, 4 amended), over the sizing target. The split point, if enforced, is web scaffold versus stack, CI and ADR.
+- F-20: New configuration: server-only `API_INTERNAL_URL` (set in Compose to `http://api:3001`, defaulting to `http://127.0.0.1:3001` for host-side dev); fixed loopback ports 3000 and 3001; container `DATABASE_URL` assembled in Compose from existing variables, so `.env.example` is unchanged; the web image sets `HOSTNAME=0.0.0.0` and `PORT=3000`.
+- F-21: Web scope: a status scaffold with the working title "Webstore" (brand name not specified); no catalog, no extra routes; the web healthcheck uses `/`; `poweredByHeader` is off; web security headers and CSP are deferred to the edge stage.
+- F-22: Containers are non-root with `cap_drop: ALL`, `no-new-privileges` and `init: true`. `read_only` filesystems, digest-pinned images and resource limits are deferred to P25. Containers do not run migrations; a one-shot migrate job is deferred to P25.
+- F-23: Versions and amendments: Next.js 16, React 19, TypeScript 5, `node:22-alpine`. ADR-0003 is Accepted and treats the F-10 defaults as accepted. `docker-compose.yml`, `app-ci.yml` and `.gitignore` are amended additively (Rule 2).
 
 ## What docs-verify asserts
 - The 12 required files exist (list in `scripts/verify-docs.mjs`).
@@ -49,3 +55,4 @@
 
 - [P1A: Database foundation](phase-reports/P1A-database-foundation.md)
 - [P1B: API hardening](phase-reports/P1B-api-hardening.md)
+- [P1C: Web and full-stack Compose](phase-reports/P1C-web-and-full-stack-compose.md)
