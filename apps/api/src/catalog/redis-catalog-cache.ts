@@ -72,6 +72,10 @@ export class RedisCatalogCache implements CatalogCache, OnModuleDestroy {
   }
 
   async onModuleDestroy(): Promise<void> {
+    if (this.client.status !== 'ready') {
+      this.client.disconnect();
+      return;
+    }
     try {
       await this.client.quit();
     } catch {

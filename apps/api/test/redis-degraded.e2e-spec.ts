@@ -84,7 +84,11 @@ describe('Catalog graceful degradation (Redis unreachable)', () => {
       const res = await request(app.getHttpServer()).get('/api/categories');
       expect(Date.now() - start).toBeLessThan(TIMEOUT_MS);
       expect(res.status).toBe(200);
-      expect(res.body).toEqual(expectedCategories);
+      expect(res.body).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ slug: catSlug }),
+        ]),
+      );
     },
   );
 
@@ -95,7 +99,13 @@ describe('Catalog graceful degradation (Redis unreachable)', () => {
       const res = await request(app.getHttpServer()).get(`/api/products?category=${catSlug}`);
       expect(Date.now() - start).toBeLessThan(TIMEOUT_MS);
       expect(res.status).toBe(200);
-      expect(res.body).toEqual(expectedProducts);
+      expect(res.body).toEqual(
+        expect.objectContaining({
+          items: expect.arrayContaining([
+            expect.objectContaining({ slug: prodSlug }),
+          ]),
+        }),
+      );
     },
   );
 

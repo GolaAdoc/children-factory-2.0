@@ -135,7 +135,14 @@ describe('RedisCatalogCache', () => {
   });
 
   describe('onModuleDestroy', () => {
-    it('calls quit on destroy', async () => {
+    it('calls disconnect directly if client is not ready', async () => {
+      (client as unknown as { status: string }).status = 'connecting';
+      await cache.onModuleDestroy();
+      expect(client.disconnect).toHaveBeenCalled();
+      expect(client.quit).not.toHaveBeenCalled();
+    });
+
+    it('calls quit on destroy if client is ready', async () => {
       await cache.onModuleDestroy();
       expect(client.quit).toHaveBeenCalled();
     });
