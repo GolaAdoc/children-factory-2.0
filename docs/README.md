@@ -71,3 +71,12 @@
 - [P1C: Web and full-stack Compose](phase-reports/P1C-web-and-full-stack-compose.md)
 - [P2: Catalog read](phase-reports/P2-catalog-read.md)
 - [P3: Catalog cache](phase-reports/P3-catalog-cache.md)
+
+- F-38: Phone required at signup and unverified, due to the schema CHECK chain.
+- F-39: The Google-only attach branch is deferred because anonymous attach enables pre-hijack. A human must decide the design (recommended: attach only from an authenticated Google session).
+- F-40: New env vars (JWT_ACCESS_SECRET, JWT_ACCESS_TTL_SECONDS) and new dependencies (argon2, @nestjs/jwt), with reasons.
+- F-41: Signup 409 permits email/phone enumeration, because there is no email verification yet.
+- F-42: GET /api/auth/me is added for token testability, outside the literal scope list.
+- F-43: No login/signup throttling in P4. It is a residual credential-stuffing and CPU-abuse risk until the edge or throttling phase.
+- F-44: Access-token-only, 15-minute sessions, with no revocation, refresh or logout.
+- F-45: Sizing: 10 feature files plus 4 housekeeping groups.

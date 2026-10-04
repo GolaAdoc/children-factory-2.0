@@ -56,17 +56,19 @@ jobs:
       - name: E2E tests
         working-directory: apps/api
         run: npm run test:e2e
-      - name: Smoke test (runtime env holds only the app-role URL and Redis URL)
+      - name: Smoke test (runtime env holds only the app-role URL, Redis URL, and JWT variables)
         working-directory: apps/api
         run: |
           set -eu
           APP_URL="$(grep '^DATABASE_URL=' ../../.env | cut -d= -f2-)"
           REDIS_URL="redis://:ci-placeholder@127.0.0.1:6379"
+          JWT_SECRET="$(grep '^JWT_ACCESS_SECRET=' ../../.env | cut -d= -f2-)"
+          JWT_TTL="$(grep '^JWT_ACCESS_TTL_SECONDS=' ../../.env | cut -d= -f2-)"
           if env -i PATH="$PATH" NODE_ENV=production node dist/main.js > "$RUNNER_TEMP/noenv.log" 2>&1; then
             echo "API started without DATABASE_URL"; exit 1
           fi
           grep -q "Invalid environment" "$RUNNER_TEMP/noenv.log"
-          env -i PATH="$PATH" DATABASE_URL="$APP_URL" REDIS_URL="$REDIS_URL" NODE_ENV=production PORT=3001 \
+          env -i PATH="$PATH" DATABASE_URL="$APP_URL" REDIS_URL="$REDIS_URL" JWT_ACCESS_SECRET="$JWT_SECRET" JWT_ACCESS_TTL_SECONDS="$JWT_TTL" NODE_ENV=production PORT=3001 \
             node dist/main.js > "$RUNNER_TEMP/api.log" 2>&1 &
           echo $! > "$RUNNER_TEMP/api.pid"
           ok=0
