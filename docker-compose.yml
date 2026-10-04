@@ -42,6 +42,8 @@ services:
       # Least-privilege application role only. No migrator or superuser credentials reach this container.
       DATABASE_URL: "postgresql://webstore_app:${APP_DB_PASSWORD:?set APP_DB_PASSWORD in .env}@db:5432/${POSTGRES_DB:?set POSTGRES_DB in .env}?schema=public"
       REDIS_URL: "redis://:${REDIS_PASSWORD:?REDIS_PASSWORD is required}@redis:6379"
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?set in .env}
+      JWT_ACCESS_TTL_SECONDS: ${JWT_ACCESS_TTL_SECONDS:-900}
     ports:
       - "127.0.0.1:3001:3001"
     healthcheck:

@@ -52,3 +52,23 @@ model ProductVariant {
   @@index([productId])
   @@map("product_variants")
 }
+
+enum UserRole {
+  customer
+  admin
+  @@map("user_role")
+}
+
+model User {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  phoneNumber  String?  @unique @map("phone_number") @db.VarChar(15)
+  email        String?  @db.VarChar(120)
+  googleId     String?  @unique @map("google_id") @db.VarChar(60)
+  passwordHash String?  @map("password_hash") @db.VarChar(100)
+  name         String?  @db.VarChar(100)
+  role         UserRole @default(customer)
+  isGuest      Boolean  @default(true) @map("is_guest")
+  riskFlag     Int      @default(0) @map("risk_flag") @db.SmallInt
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  @@map("users")
+}
